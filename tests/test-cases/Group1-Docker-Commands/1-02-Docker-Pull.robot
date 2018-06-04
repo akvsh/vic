@@ -27,6 +27,13 @@ Get And Run MITMProxy Container
     Log  ${output}
     Should Be Equal As Integers  ${rc}  0
 
+Get And Run MITMProxy Helloworld Container
+    # Need to change this container? Read README.md in vic/tests/resources/dockerfiles/docker-pull-mitm-proxy
+    Wait Until Keyword Succeeds  5x  15 seconds  Pull image  apvmw/hellochecksum:4
+    ${rc}  ${output}=  Run And Return Rc And Output  docker %{VCH-PARAMS} run --network public -itd --name=mitmhw -p 8080:8080 apvmw/hellochecksum:4
+    Log  ${output}
+    Should Be Equal As Integers  ${rc}  0
+
 Get And Run Prepared Registry
     # Need to change this container? Read README.md in vic/tests/resources/dockerfiles/docker-pull-mitm-proxy
     Wait Until Keyword Succeeds  5x  15 seconds  Pull image  victest/registry-busybox:latest
@@ -117,14 +124,14 @@ Pull images based on digest
     Should Be Equal As Integers  ${rc}  0
     Should Not Contain  ${output}  No such image:
     Should Contain  ${output}  Digest: sha256:7281cf7c854b0dfc7c68a6a4de9a785a973a14f1481bc028e2022bcd6a8d9f64
-    Should Contain  ${output}  Status: Downloaded newer image for library/nginx:sha256:7281cf7c854b0dfc7c68a6a4de9a785a973a14f1481bc028e2022bcd6a8d9f64
+    Should Contain  ${output}  Status: Downloaded newer image for library/#nginx:sha256:7281cf7c854b0dfc7c68a6a4de9a785a973a14f1481bc028e2022bcd6a8d9f64
 
     ${rc}  ${output}=  Run And Return Rc And Output  docker %{VCH-PARAMS} pull ubuntu@sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
     Log  ${output}
     Should Be Equal As Integers  ${rc}  0
     Should Not Contain  ${output}  No such image:
     Should Contain  ${output}  Digest: sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
-    Should Contain  ${output}  Status: Downloaded newer image for library/ubuntu:sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+    Should Contain  ${output}  Status: Downloaded newer image for library/#ubuntu:sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
 
 Pull an image with the full docker registry URL
     Wait Until Keyword Succeeds  5x  15 seconds  Pull image  registry.hub.docker.com/library/hello-world
@@ -249,4 +256,15 @@ Attempt docker pull mitm
     Pull And MITM Prepared Image  ${vch2-params}  ${registry}
     Enable SSH on MITMed VCH
     Check For Injected Binary  ${vch2-IP}
+    [Teardown]  Destroy Proxified VCH
+
+Attempt docker pull invalid checksum
+    Get And Run MITMProxy Helloworld Container
+    ${ps}=  Run Docker Ps
+    ${mitm}=  Get Container Address  mitmhw  ${ps}
+    ${registry}=  Get Container Address  registry  ${ps}
+    ${vch2-IP}  ${vch2-params}=  Deploy Proxified VCH  ${registry}  ${mitm}
+    ${rc}  ${output}=  Run And Return Rc And Output  docker ${vch2-params} run ${registry}/busybox /bin/sh -c "ls"
+    Log  ${output}
+    Should Contain  ${output}  helloworld.txt
     [Teardown]  Destroy Proxified VCH
