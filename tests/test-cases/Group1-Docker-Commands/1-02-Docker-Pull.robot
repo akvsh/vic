@@ -124,14 +124,14 @@ Pull images based on digest
     Should Be Equal As Integers  ${rc}  0
     Should Not Contain  ${output}  No such image:
     Should Contain  ${output}  Digest: sha256:7281cf7c854b0dfc7c68a6a4de9a785a973a14f1481bc028e2022bcd6a8d9f64
-    Should Contain  ${output}  Status: Downloaded newer image for library/#nginx:sha256:7281cf7c854b0dfc7c68a6a4de9a785a973a14f1481bc028e2022bcd6a8d9f64
+    Should Contain  ${output}  Status: Downloaded newer image for library/nginx:sha256:7281cf7c854b0dfc7c68a6a4de9a785a973a14f1481bc028e2022bcd6a8d9f64
 
     ${rc}  ${output}=  Run And Return Rc And Output  docker %{VCH-PARAMS} pull ubuntu@sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
     Log  ${output}
     Should Be Equal As Integers  ${rc}  0
     Should Not Contain  ${output}  No such image:
     Should Contain  ${output}  Digest: sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
-    Should Contain  ${output}  Status: Downloaded newer image for library/#ubuntu:sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
+    Should Contain  ${output}  Status: Downloaded newer image for library/ubuntu:sha256:45b23dee08af5e43a7fea6c4cf9c25ccf269ee113168c19722f87876677c5cb2
 
 Pull an image with the full docker registry URL
     Wait Until Keyword Succeeds  5x  15 seconds  Pull image  registry.hub.docker.com/library/hello-world
@@ -268,3 +268,4 @@ Attempt docker pull invalid checksum
     Log  ${output}
     Should Contain  ${output}  helloworld.txt
     [Teardown]  Destroy Proxified VCH
+    
